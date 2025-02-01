@@ -32,7 +32,7 @@ limitations under the License.
         -->
         <maven.exec.skip>false</maven.exec.skip> <!-- default -->
         <skipImageBuild>${maven.exec.skip}</skipImageBuild>
-        <docker.platforms>linux/amd64,linux/arm64/v8</docker.platforms>
+        <docker.platforms>linux/amd64,linux/arm64/v8,linux/arm64</docker.platforms>
     </properties>
     <dependencies>
         <dependency>
@@ -170,7 +170,7 @@ limitations under the License.
             <plugin>
                 <artifactId>exec-maven-plugin</artifactId>
                 <groupId>org.codehaus.mojo</groupId>
-                <version>3.1.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>build-image</id>

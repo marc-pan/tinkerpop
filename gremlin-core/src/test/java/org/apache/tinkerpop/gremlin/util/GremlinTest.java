@@ -35,12 +35,23 @@ public class GremlinTest {
 
     @Test
     public void shouldGetVersion() {
-        //Remove -SNAPSHOT from version for test
-        String[] version = Gremlin.version().replace("-SNAPSHOT", "").split("\\.");
+        String versionString = Gremlin.version();
+        //Remove suffixes such as -SNAPSHOT from version for test
+        if (versionString.contains("-")) {
+            versionString = versionString.substring(0, versionString.indexOf("-"));
+        }
+        String[] version = versionString.replace("-SNAPSHOT", "").split("\\.");
 
         assertEquals("Gremlin.version() should be in format of x.y.z", 3, version.length);
         assertTrue("Major version should be greater than 3", Integer.parseInt(version[0]) > 3);
         assertTrue("Minor version should be a positive int", Integer.parseInt(version[1]) >= 0);
         assertTrue("Patch version should be a positive int", Integer.parseInt(version[2]) >= 0);
+    }
+
+    @Test
+    public void shouldGetMajorVersion() {
+        String majorVersion = Gremlin.majorVersion();
+
+        assertTrue("Major version should be greater than 3", Integer.parseInt(majorVersion) > 3);
     }
 }

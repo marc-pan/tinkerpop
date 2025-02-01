@@ -32,6 +32,10 @@ import type {
   WebSocket as NodeWebSocket,
   Event as NodeWebSocketEvent,
 } from 'ws';
+import {
+  ClientRequest,
+  IncomingMessage,
+} from "http";
 import ioc from '../structure/io/binary/GraphBinary.js';
 import * as serializer from '../structure/io/graph-serializer.js';
 import * as utils from '../utils.js';
@@ -69,7 +73,6 @@ export type ConnectionOptions = {
   authenticator?: Authenticator;
   headers?: Record<string, string | string[]>;
   enableUserAgentOnConnect?: boolean;
-  enableCompression?: boolean;
   agent?: Agent;
 };
 
@@ -114,7 +117,6 @@ export default class Connection extends EventEmitter {
    * @param {Object} [options.headers] An associative array containing the additional header key/values for the initial request.
    * @param {Boolean} [options.enableUserAgentOnConnect] Determines if a user agent will be sent during connection handshake. Defaults to: true
    * @param {http.Agent} [options.agent] The http.Agent implementation to use.
-   * @param {Boolean} [options.enableCompression] Enable per-message deflate compression. Defaults to: false.
    * @constructor
    */
   constructor(
@@ -171,12 +173,27 @@ export default class Connection extends EventEmitter {
         headers[utils.getUserAgentHeader()] = userAgent;
       }
     }
-
-    const WebSocket = (globalThis.WebSocket as typeof globalThis.WebSocket | undefined) ?? (await import('ws')).default;
+    // All these options are available to the `ws` package's constructor, but not the global WebSocket class
+    const wsSpecificOptions: Set<string> = new Set([
+      'headers',
+      'ca',
+      'cert',
+      'pfx',
+      'rejectUnauthorized',
+      'agent',
+      'perMessageDeflate',
+    ]);
+    // Check if any `ws` specific options are provided and are non-null / non-undefined
+    const hasWsSpecificOptions: boolean = Object.entries(this.options).some(
+      ([key, value]) => wsSpecificOptions.has(key) && ![null, undefined].includes(value),
+    );
+    // Only use the global websocket if we don't have any unsupported options
+    const useGlobalWebSocket = !hasWsSpecificOptions && globalThis.WebSocket;
+    const WebSocket = useGlobalWebSocket || (await import('ws')).default;
 
     this._ws = new WebSocket(
       this.url,
-      globalThis.WebSocket === undefined
+      !useGlobalWebSocket
         ? {
             // @ts-expect-error
             headers: headers,
@@ -185,7 +202,6 @@ export default class Connection extends EventEmitter {
             pfx: this.options.pfx,
             rejectUnauthorized: this.options.rejectUnauthorized,
             agent: this.options.agent,
-            perMessageDeflate: this.options.enableCompression,
           }
         : undefined,
     );
@@ -198,6 +214,10 @@ export default class Connection extends EventEmitter {
     this._ws!.addEventListener('open', this.#handleOpen);
     // @ts-expect-error
     this._ws!.addEventListener('error', this.#handleError);
+    // The following listener needs to use `.on` and `.off` because the `ws` package's addEventListener only accepts certain event types
+    // Ref: https://github.com/websockets/ws/blob/8.16.0/lib/event-target.js#L202-L241
+    // @ts-expect-error
+    this._ws!.on('unexpected-response', this.#handleUnexpectedResponse);
     // @ts-expect-error
     this._ws!.addEventListener('message', this.#handleMessage);
     // @ts-expect-error
@@ -304,6 +324,32 @@ export default class Connection extends EventEmitter {
     this.#cleanupWebsocket(error);
     this.emit('socketError', error);
   };
+
+  #handleUnexpectedResponse = async (_: ClientRequest, res: IncomingMessage) => {
+    const body = await new Promise((resolve, reject) => {
+      const chunks: any[] = [];
+      res.on('data', data => {
+        chunks.push(data instanceof Buffer ? data : Buffer.from(data));
+      });
+      res.on('end', () => {
+        resolve(chunks.length ? Buffer.concat(chunks) : null);
+      });
+      res.on('error', reject);
+    });
+    // @ts-ignore
+    const statusCodeErrorMessage = `Unexpected server response code ${res.statusCode}`;
+    // @ts-ignore
+    const errorMessage = body ? `${statusCodeErrorMessage} with body:\n${body.toString()}` : statusCodeErrorMessage;
+    const error = new Error(errorMessage);
+    this.#handleError({
+      error,
+      message: errorMessage,
+      type: 'unexpected-response',
+      target: this._ws
+    } as NodeWebSocketErrorEvent);
+  };
+
+
 
   #handleClose = ({ code, reason }: CloseEvent | NodeWebSocketCloseEvent) => {
     this.emit('log', `ws close code=${code} message=${reason}`);
@@ -419,6 +465,10 @@ export default class Connection extends EventEmitter {
     this._ws?.removeEventListener('open', this.#handleOpen);
     // @ts-expect-error
     this._ws?.removeEventListener('error', this.#handleError);
+    // The following listener needs to use `.on` and `.off` because the `ws` package's addEventListener only accepts certain event types
+    // Ref: https://github.com/websockets/ws/blob/8.16.0/lib/event-target.js#L202-L241
+    // @ts-expect-error
+    this._ws?.off('unexpected-response', this.#handleUnexpectedResponse);
     // @ts-expect-error
     this._ws?.removeEventListener('message', this.#handleMessage);
     // @ts-expect-error

@@ -78,7 +78,7 @@ public class TraversalSourceSelfMethodVisitor extends DefaultGremlinBaseVisitor<
             return source.withSack(antlr.argumentVisitor.visitGenericLiteralArgument(ctx.genericLiteralArgument()));
         } else {
             return source.withSack(antlr.argumentVisitor.visitGenericLiteralArgument(ctx.genericLiteralArgument()),
-                    (BinaryOperator) antlr.argumentVisitor.visitTraversalBiFunctionArgument(ctx.traversalBiFunctionArgument()));
+                    TraversalEnumParser.parseTraversalEnumFromContext(Operator.class, ctx.traversalBiFunction().traversalOperator()));
         }
     }
 
@@ -89,12 +89,12 @@ public class TraversalSourceSelfMethodVisitor extends DefaultGremlinBaseVisitor<
     public GraphTraversalSource visitTraversalSourceSelfMethod_withSideEffect(final GremlinParser.TraversalSourceSelfMethod_withSideEffectContext ctx) {
         if (ctx.getChildCount() < 8) {
             // with 4 children withSideEffect() was called without a reducer specified.
-            return source.withSideEffect(antlr.argumentVisitor.parseString(ctx.stringArgument()),
+            return source.withSideEffect(antlr.genericVisitor.parseString(ctx.stringLiteral()),
                     antlr.argumentVisitor.visitGenericLiteralArgument(ctx.genericLiteralArgument()));
         } else {
-            return source.withSideEffect(antlr.argumentVisitor.parseString(ctx.stringArgument()),
+            return source.withSideEffect(antlr.genericVisitor.parseString(ctx.stringLiteral()),
                     antlr.argumentVisitor.visitGenericLiteralArgument(ctx.genericLiteralArgument()),
-                    (BinaryOperator) antlr.argumentVisitor.visitTraversalBiFunctionArgument(ctx.traversalBiFunctionArgument()));
+                    TraversalEnumParser.parseTraversalEnumFromContext(Operator.class, ctx.traversalBiFunction().traversalOperator()));
         }
     }
 
@@ -138,9 +138,9 @@ public class TraversalSourceSelfMethodVisitor extends DefaultGremlinBaseVisitor<
     @Override
     public GraphTraversalSource visitTraversalSourceSelfMethod_with(final GremlinParser.TraversalSourceSelfMethod_withContext ctx) {
         if (ctx.getChildCount() == 4) {
-            return source.with(antlr.argumentVisitor.parseString(ctx.stringArgument()));
+            return source.with(antlr.genericVisitor.parseString(ctx.stringLiteral()));
         } else {
-            return source.with(antlr.argumentVisitor.parseString(ctx.stringArgument()),
+            return source.with(antlr.genericVisitor.parseString(ctx.stringLiteral()),
                     antlr.argumentVisitor.visitGenericLiteralArgument(ctx.genericLiteralArgument()));
         }
     }

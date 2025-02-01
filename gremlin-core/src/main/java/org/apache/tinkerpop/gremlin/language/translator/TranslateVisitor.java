@@ -903,17 +903,17 @@ public class TranslateVisitor extends AbstractParseTreeVisitor<Void> implements 
     }
 
     @Override
-    public Void visitTraversalMethod_option_Merge_Traversal(final GremlinParser.TraversalMethod_option_Merge_TraversalContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
     public Void visitTraversalMethod_option_Object_Traversal(final GremlinParser.TraversalMethod_option_Object_TraversalContext ctx) {
         return visitChildren(ctx);
     }
 
     @Override
     public Void visitTraversalMethod_option_Traversal(final GremlinParser.TraversalMethod_option_TraversalContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitTraversalMethod_option_Merge_Traversal(final GremlinParser.TraversalMethod_option_Merge_TraversalContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -2090,72 +2090,12 @@ public class TranslateVisitor extends AbstractParseTreeVisitor<Void> implements 
     }
 
     @Override
+    public Void visitNullableGenericLiteralMap(final GremlinParser.NullableGenericLiteralMapContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitStructureVertexArgument(final GremlinParser.StructureVertexArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalCardinalityArgument(final GremlinParser.TraversalCardinalityArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalColumnArgument(final GremlinParser.TraversalColumnArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalDirectionArgument(final GremlinParser.TraversalDirectionArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalMergeArgument(final GremlinParser.TraversalMergeArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalOrderArgument(final GremlinParser.TraversalOrderArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalPopArgument(final GremlinParser.TraversalPopArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalSackMethodArgument(final GremlinParser.TraversalSackMethodArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalScopeArgument(final GremlinParser.TraversalScopeArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalTokenArgument(final GremlinParser.TraversalTokenArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalComparatorArgument(final GremlinParser.TraversalComparatorArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalFunctionArgument(final GremlinParser.TraversalFunctionArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalBiFunctionArgument(final GremlinParser.TraversalBiFunctionArgumentContext ctx) {
-        return visitChildren(ctx);
-    }
-
-    @Override
-    public Void visitTraversalDTArgument(final GremlinParser.TraversalDTArgumentContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -2211,6 +2151,11 @@ public class TranslateVisitor extends AbstractParseTreeVisitor<Void> implements 
 
     @Override
     public Void visitStringLiteralVarargs(final GremlinParser.StringLiteralVarargsContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitStringLiteralVarargsLiterals(final GremlinParser.StringLiteralVarargsLiteralsContext ctx) {
         return visitChildren(ctx);
     }
 
